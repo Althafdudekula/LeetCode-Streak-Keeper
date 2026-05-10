@@ -1,0 +1,31 @@
+name: LeetCode Streak Keeper
+
+on:
+  schedule:
+    # Runs at 11:00 PM UTC every day
+    # You can adjust the cron schedule if you want a different time
+    - cron: '0 23 * * *'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+jobs:
+  keep-streak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run Streak Keeper
+        env:
+          LEETCODE_SESSION: ${{ secrets.LEETCODE_SESSION }}
+          CSRF_TOKEN: ${{ secrets.CSRF_TOKEN }}
+        run: python leetcode_streak_keeper.py

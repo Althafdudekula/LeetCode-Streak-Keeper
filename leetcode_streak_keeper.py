@@ -77,7 +77,28 @@ if user is None:
 
 return user["username"]
 
+def get_username():
+    """Get the username of the currently authenticated user."""
+    query = """
+    query {
+      user {
+        username
+      }
+    }
+    """
 
+    data = graphql(query)
+
+    log.info(f"GraphQL response: {data}")
+
+    user = data.get("data", {}).get("user")
+
+    if user is None:
+        raise Exception(
+            f"LeetCode authentication failed. Response: {data}"
+        )
+
+    return user["username"]
 def already_submitted_today() -> bool:
     """Check submission calendar — returns True if there's already a submission today."""
     query = """

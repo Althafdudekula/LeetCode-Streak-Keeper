@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 # ──────────────────────────────────────────────
 # CONFIGURATION — fill these in
 # ──────────────────────────────────────────────
-LEETCODE_SESSION = os.environ.get("LEETCODE_SESSION","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfYXV0aF91c2VyX2lkIjoiMTQ3MzE3MTkiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiJlOWRkNjIyMzcwMmVlZGNkZDBmNjhhMTc5YTE2NjlkN2I4NmQzZTQ1MjY3YWU4MWU0NmI1MTNhNGNjMDNjNDEzIiwic2Vzc2lvbl91dWlkIjoiYzlhNDkxMmUiLCJpZCI6MTQ3MzE3MTksImVtYWlsIjoiZHVkZWt1bGFhbHRoYWY2QGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiQWx0aGFmX2R1ZGVrdWxhIiwidXNlcl9zbHVnIjoiQWx0aGFmX2R1ZGVrdWxhIiwiYXZhdGFyIjoiaHR0cHM6Ly9hc3NldHMubGVldGNvZGUuY29tL3VzZXJzL2RlZmF1bHRfYXZhdGFyLmpwZyIsInJlZnJlc2hlZF9hdCI6MTc4MTIzMzc2OSwiaXAiOiIyNDAxOjQ5MDA6OTZmMjoyYzM3OjE5NDQ6OTgxNDplZTg3Ojk5ODMiLCJpZGVudGl0eSI6IjE2ZmVlMzc1NTlkYmQ0MmI0NDgyMDQ0NDZkMDIwODlmIiwiZGV2aWNlX3dpdGhfaXAiOlsiOTZkYmM2MTc5MTMyZmFjNTNkNzI5ZGRlYTA3ZWRmNjMiLCIyNDAxOjQ5MDA6OTZmMjoyYzM3OjE5NDQ6OTgxNDplZTg3Ojk5ODMiXSwiX3Nlc3Npb25fZXhwaXJ5IjoxMjA5NjAwfQ.5J2KkG50uT98eRTeWOWHiJfbOyzMKyG4i16PR3HKTmg")
+LEETCODE_SESSION = os.environ.get("LEETCODE_SESSION","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfYXV0aF91c2VyX2lkIjoiMTQ3MzE3MTkiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiJlOWRkNjIyMzcwMmVlZGNkZDBmNjhhMTc5YTE2NjlkN2I4NmQzZTQ1MjY3YWU4MWU0NmI1MTNhNGNjMDNjNDEzIiwic2Vzc2lvbl91dWlkIjoiYzlhNDkxMmUiLCJpZCI6MTQ3MzE3MTksImVtYWlsIjoiZHVkZWt1bGFhbHRoYWY2QGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiQWx0aGFmX2R1ZGVrdWxhIiwidXNlcl9zbHVnIjoiQWx0aGFmX2R1ZGVrdWxhIiwiYXZhdGFyIjoiaHR0cHM6Ly9hc3NldHMubGVldGNvZGUuY29tL3VzZXJzL2RlZmF1bHRfYXZhdGFyLmpwZyIsInJlZnJlc2hlZF9hdCI6MTc4MTIzMzc2OSwiaXAiOiIyNDAxOjQ5MDA6OTcxZjoxNjM3OmFjNTQ6ZTZhMjpkYmNhOjIwODEiLCJpZGVudGl0eSI6IjE2ZmVlMzc1NTlkYmQ0MmI0NDgyMDQ0NDZkMDIwODlmIiwiZGV2aWNlX3dpdGhfaXAiOlsiOTZkYmM2MTc5MTMyZmFjNTNkNzI5ZGRlYTA3ZWRmNjMiLCIyNDAxOjQ5MDA6OTZmMjoyYzM3OjE5NDQ6OTgxNDplZTg3Ojk5ODMiXSwiX3Nlc3Npb25fZXhwaXJ5IjoxMjA5NjAwfQ.YchsxRYsnEwaCqgRV6Ki8wUt4j8uDuDudMq3jh4rtEM")
 CSRF_TOKEN       = os.environ.get("CSRF_TOKEN", "7ex4ktZe3tQS4MdVrLElC9EPlagvuXDV")
 
 # How many past submissions to fetch and pick from (picks one randomly)
@@ -68,10 +68,14 @@ def graphql(query: str, variables: dict = None) -> dict:
     resp.raise_for_status()
     return resp.json()
 
+user = data.get("data", {}).get("user")
 
-def get_username() -> str:
-    data = graphql("{ user { username } }")
-    return data["data"]["user"]["username"]
+if user is None:
+    raise Exception(
+        "LeetCode authentication failed. Check LEETCODE_SESSION and CSRF_TOKEN."
+    )
+
+return user["username"]
 
 
 def already_submitted_today() -> bool:

@@ -68,17 +68,10 @@ def graphql(query: str, variables: dict = None) -> dict:
     resp.raise_for_status()
     return resp.json()
 
-user = data.get("data", {}).get("user")
-
-if user is None:
-    raise Exception(
-        "LeetCode authentication failed. Check LEETCODE_SESSION and CSRF_TOKEN."
-    )
-
-return user["username"]
 
 def get_username():
     """Get the username of the currently authenticated user."""
+
     query = """
     query {
       user {
@@ -87,18 +80,24 @@ def get_username():
     }
     """
 
-    data = graphql(query)
+    try:
+        data = graphql(query)
+        log.info(f"GraphQL response: {data}")
 
-    log.info(f"GraphQL response: {data}")
+        user = data.get("data", {}).get("user")
 
-    user = data.get("data", {}).get("user")
+        if not user:
+            raise Exception(
+                f"Authentication failed. Check LEETCODE_SESSION and CSRF_TOKEN. Response: {data}"
+            )
 
-    if user is None:
-        raise Exception(
-            f"LeetCode authentication failed. Response: {data}"
-        )
+        return user["username"]
 
-    return user["username"]
+    except Exception as e:
+        log.error(f"Failed to get username: {e}")
+        raise
+
+
 def already_submitted_today() -> bool:
     """Check submission calendar — returns True if there's already a submission today."""
     query = """
